@@ -4,7 +4,6 @@ import matplotlib as mpl
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 import tkinter as GUI
-import threading
 
 '''Core'''
 
@@ -86,6 +85,7 @@ def packet(env, pk, link):
     global packet_lost
     global total_queuing_delay
     global total_transmission_delay
+
     size = 1 / generate_interval(BANDWIDTH_DISTRIBUTION, B_PARAMETER_ONE, B_PARAMETER_TWO, B_PARAMETER_THREE)
     print('Packet %d generated at %s, size = %s' % (pk, env.now, size))
     packet_generated += 1
@@ -109,6 +109,16 @@ def packet(env, pk, link):
         print('Packet %d lost at %s' % (pk, env.now))
 
 def transmit(env, link):
+    global packet_generated
+    global packet_lost
+    global total_queuing_delay
+    global total_transmission_delay
+
+    packet_generated = 0
+    packet_lost = 0
+    total_queuing_delay = 0.0
+    total_transmission_delay = 0.0
+
     pk = 1
     while True:
         env.process(packet(env, pk, link))
@@ -120,6 +130,7 @@ def transmit(env, link):
 ##
 # Main Frame
 ##
+
 main = GUI.Tk()
 main.wm_title('Network Simulator')
 
@@ -130,7 +141,6 @@ button_frame    = GUI.Frame(main)
 message_frame   = GUI.Frame(main)
 accounting_method_frame = GUI.Frame(main)
 request_method_frame = GUI.Frame(main)
-
 
 ##
 # Distributions
@@ -318,33 +328,6 @@ for i in range(10000):
     for key in graph_dict:
         graph_dict[key].append(0)
 
-figure = plt.Figure(figsize=(5,4), dpi=100)
-'''aqd = figure.add_subplot(111)
-x = range(10)
-y = range(10)
-a.plot(x, y)'''
-
-aqd = figure.add_subplot(2, 2, 1)
-aqd.plot(range(10000), graph_dict['average_queuing_delay'])
-#aqd.ylabel('Average Queuing Delay')
-#aqd.xlabel('Time')
-plt.subplot(2, 2, 2)
-plt.plot(range(10000), graph_dict['average_transmission_delay'])
-plt.ylabel('Average Transmission Delay')
-plt.xlabel('Time')
-plt.subplot(2, 2, 3)
-plt.plot(range(10000), graph_dict['packet_lost_rate'])
-plt.ylabel('Packet Lost Rate')
-plt.xlabel('Time')
-plt.subplot(2, 2, 4)
-plt.plot(range(10000), graph_dict['throughput'])
-plt.ylabel('Throughput')
-plt.xlabel('Time')
-
-canvas = mpl.backends.backend_tkagg.FigureCanvasTkAgg(figure, master= main)
-#canvas.show()
-#canvas.get_tk_widget().grid(row = 1, column = 2, padx = 20)
-
 ##
 # Control
 ##
@@ -375,7 +358,6 @@ def graph(env, graph_dict):
 
 def start_simulation():
     global graph_dict
-    global canvas
     env = simpy.Environment()
     link = []
     for i in range(RESOURCE_POOL_CAPACITY):
@@ -383,8 +365,31 @@ def start_simulation():
     env.process(transmit(env, link))
     env.process(graph(env, graph_dict))
     env.run(until = 10000)
-    canvas.show()
-    canvas.get_tk_widget().grid(row = 1, column = 2, padx = 20)
+
+    figure = plt.Figure(figsize=(8,6), dpi=100)
+
+    aqd = figure.add_subplot(2, 2, 1)
+    aqd.plot(range(10000), graph_dict['average_queuing_delay'])
+    aqd.set_ylabel('Average Queuing Delay')
+    aqd.set_xlabel('Time')
+
+    atd = figure.add_subplot(2, 2, 2)
+    atd.plot(range(10000), graph_dict['average_transmission_delay'])
+    atd.set_ylabel('Average Transmission Delay')
+    atd.set_xlabel('Time')
+
+    plr = figure.add_subplot(2, 2, 3)
+    plr.plot(range(10000), graph_dict['packet_lost_rate'])
+    plr.set_ylabel('Packet Lost Rate')
+    plr.set_xlabel('Time')
+
+    tp = figure.add_subplot(2, 2, 4)
+    tp.plot(range(10000), graph_dict['throughput'])
+    tp.set_ylabel('Throughput')
+    tp.set_xlabel('Time')
+
+    canvas = mpl.backends.backend_tkagg.FigureCanvasTkAgg(figure, master= main)
+    canvas.get_tk_widget().grid(row = 1, column = 2, rowspan = 3, padx = 20, pady = 20)
     print('Total packet generated', packet_generated)
     print('Total packet lost', packet_lost)
     print('Total Queuing Delay', total_queuing_delay)
@@ -495,4 +500,6 @@ button_frame.grid(row = 4, columnspan = 2, pady = 10)
 ##
 # Start Main loop
 ##
+print('Network Simulator')
+print('- Console -')
 main.mainloop()
