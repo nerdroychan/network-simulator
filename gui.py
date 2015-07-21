@@ -173,6 +173,34 @@ DISTRIBUTION_TYPE = [
     '10) weibullvariate',
 ]
 
+def p_check_distribution():
+    global temp_packet_generation_distribution
+    global p_parameter_two_input
+    global p_parameter_three_input
+    if temp_packet_generation_distribution.get() in [0, 2, 4, 5, 6, 7, 8, 10]:
+        p_parameter_two_input.configure(state = 'normal')
+        p_parameter_three_input.configure(state = 'disabled')
+    elif temp_packet_generation_distribution.get() == 1:
+        p_parameter_two_input.configure(state = 'normal')
+        p_parameter_three_input.configure(state = 'normal')
+    elif temp_packet_generation_distribution.get() in [3, 9]:
+        p_parameter_two_input.configure(state = 'disabled')
+        p_parameter_three_input.configure(state = 'disabled')
+
+def b_check_distribution():
+    global temp_bandwidth_distribution
+    global b_parameter_two_input
+    global b_parameter_three_input
+    if temp_bandwidth_distribution.get() in [0, 2, 4, 5, 6, 7, 8, 10]:
+        b_parameter_two_input.configure(state = 'normal')
+        b_parameter_three_input.configure(state = 'disabled')
+    elif temp_bandwidth_distribution.get() == 1:
+        b_parameter_two_input.configure(state = 'normal')
+        b_parameter_three_input.configure(state = 'normal')
+    elif temp_bandwidth_distribution.get() in [3, 9]:
+        b_parameter_two_input.configure(state = 'disabled')
+        b_parameter_three_input.configure(state = 'disabled')
+
 GUI.Label(
     bandwidth_frame,
     text = 'Bandwidth:',
@@ -187,6 +215,7 @@ for i in range(len(DISTRIBUTION_TYPE)):
         padx = 20, 
         variable = temp_bandwidth_distribution, 
         value = i,
+        command = b_check_distribution,
         ).grid(column = 0, sticky = GUI.W)
 
 GUI.Label(bandwidth_frame, text = 'Parameter 1 (Required)').grid(column = 0)
@@ -218,6 +247,7 @@ for i in range(len(DISTRIBUTION_TYPE)):
         padx = 20, 
         variable = temp_packet_generation_distribution, 
         value = i,
+        command = p_check_distribution,
         ).grid(column = 1, sticky = GUI.W)
 
 GUI.Label(frequency_frame, text = 'Parameter 1 (Required)').grid(column = 1)
