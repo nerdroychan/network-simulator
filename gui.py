@@ -389,7 +389,7 @@ def start_simulation():
     tp.set_xlabel('Time')
 
     canvas = mpl.backends.backend_tkagg.FigureCanvasTkAgg(figure, master= main)
-    canvas.get_tk_widget().grid(row = 1, column = 2, rowspan = 3, padx = 20, pady = 20)
+    canvas.get_tk_widget().grid(row = 1, column = 2, rowspan = 4, padx = 20, pady = 20)
     print('Total packet generated', packet_generated)
     print('Total packet lost', packet_lost)
     print('Total Queuing Delay', total_queuing_delay)
