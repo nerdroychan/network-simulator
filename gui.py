@@ -494,7 +494,7 @@ def apply_changes():
 
 GUI.Button(button_frame, text = 'Apply Changes', command = apply_changes).grid(column = 0, row = 0)
 GUI.Button(button_frame, text = 'Start', command = start_simulation).grid(column = 1, row = 0)
-GUI.Button(button_frame, text = 'Pause').grid(column = 2, row = 0)
+GUI.Button(button_frame, text = 'Pause (Not available)').grid(column = 2, row = 0)
 button_frame.grid(row = 4, columnspan = 2, pady = 10)
 
 ##
