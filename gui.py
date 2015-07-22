@@ -366,7 +366,7 @@ GUI.Label(
     ).grid()
 
 total_time_input = GUI.Entry(total_time_frame)
-total_time_input.insert(0, 0)
+total_time_input.insert(0, 10000)
 total_time_input.grid(padx = 20, sticky = GUI.W)
 total_time_frame.grid(column = 0, row = 3, pady = 15)
 
