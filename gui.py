@@ -362,6 +362,17 @@ for i in range(10000):
     for key in graph_dict:
         graph_dict[key].append(0)
 
+figure = plt.Figure(figsize = (8,6), dpi = 100)
+
+aqd = figure.add_subplot(2, 2, 1)
+atd = figure.add_subplot(2, 2, 2)
+plr = figure.add_subplot(2, 2, 3)
+tp = figure.add_subplot(2, 2, 4)
+
+canvas = mpl.backends.backend_tkagg.FigureCanvasTkAgg(figure, master= main)
+canvas.show()
+canvas.get_tk_widget().grid(row = 1, column = 2, rowspan = 4, padx = 20, pady = 20)
+
 ##
 # Control
 ##
@@ -390,8 +401,40 @@ def graph(env, graph_dict):
             graph_dict['throughput'][i] = 0
         yield env.timeout(1)
 
+def clear_graph():
+    global aqd
+    global atd
+    global plr
+    global tp
+    global canvas
+
+    aqd.cla()
+    aqd.set_ylabel('Average Queuing Delay')
+    aqd.set_xlabel('Time')
+
+    atd.cla()
+    atd.set_ylabel('Average Transmission Delay')
+    atd.set_xlabel('Time')
+
+    plr.cla()
+    plr.set_ylabel('Packet Lost Rate')
+    plr.set_xlabel('Time')
+
+    tp.cla()
+    tp.set_ylabel('Throughput')
+    tp.set_xlabel('Time')
+    
+    canvas.show()
+    canvas.get_tk_widget().grid(row = 1, column = 2, rowspan = 4, padx = 20, pady = 20)
+
 def start_simulation():
     global graph_dict
+    global figure
+    global aqd
+    global qtd
+    global plr
+    global tp
+    global canvas
     env = simpy.Environment()
     link = []
     for i in range(RESOURCE_POOL_CAPACITY):
@@ -400,30 +443,25 @@ def start_simulation():
     env.process(graph(env, graph_dict))
     env.run(until = 10000)
 
-    figure = plt.Figure(figsize = (8,6), dpi = 100)
-
-    aqd = figure.add_subplot(2, 2, 1)
     aqd.plot(range(10000), graph_dict['average_queuing_delay'])
     aqd.set_ylabel('Average Queuing Delay')
     aqd.set_xlabel('Time')
 
-    atd = figure.add_subplot(2, 2, 2)
     atd.plot(range(10000), graph_dict['average_transmission_delay'])
     atd.set_ylabel('Average Transmission Delay')
     atd.set_xlabel('Time')
 
-    plr = figure.add_subplot(2, 2, 3)
     plr.plot(range(10000), graph_dict['packet_lost_rate'])
     plr.set_ylabel('Packet Lost Rate')
     plr.set_xlabel('Time')
 
-    tp = figure.add_subplot(2, 2, 4)
     tp.plot(range(10000), graph_dict['throughput'])
     tp.set_ylabel('Throughput')
     tp.set_xlabel('Time')
 
-    canvas = mpl.backends.backend_tkagg.FigureCanvasTkAgg(figure, master= main)
+    canvas.show()
     canvas.get_tk_widget().grid(row = 1, column = 2, rowspan = 4, padx = 20, pady = 20)
+
     print('Total packet generated', packet_generated)
     print('Total packet lost', packet_lost)
     print('Total Queuing Delay', total_queuing_delay)
@@ -528,7 +566,7 @@ def apply_changes():
 
 GUI.Button(button_frame, text = 'Apply', command = apply_changes).grid(column = 0, row = 0)
 GUI.Button(button_frame, text = 'Start', command = start_simulation).grid(column = 1, row = 0, padx = 15)
-#GUI.Button(button_frame, text = 'Pause (Not available)').grid(column = 2, row = 0)
+GUI.Button(button_frame, text = 'Clear', command = clear_graph).grid(column = 2, row = 0)
 button_frame.grid(row = 4, columnspan = 2, pady = 10)
 
 ##
