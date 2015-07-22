@@ -38,10 +38,10 @@ def generate_priority(accounting_method, pk):
     elif accounting_method == 2:
         return rand.randint(1, 65535)
 
-def total_queue_load(link):
+def total_link_load(link):
     total_load = 0
     for i in link:
-        total_load += len(i.queue)
+        total_load += len(i.queue) + i.count
     return total_load
 
 def port_to_request(method, link, pk):
@@ -90,9 +90,9 @@ def packet(env, pk, link):
     print('Packet %d generated at %s, size = %s' % (pk, env.now, size))
     packet_generated += 1
     generation_time = float(env.now)
-    if total_queue_load(link) < BUFFER_CAPACITY * len(link):
+    if total_link_load(link) < (BUFFER_CAPACITY + 1) * len(link):
         port = port_to_request(REQUEST_METHOD, link, pk)
-        if len(port.queue) < BUFFER_CAPACITY:
+        if len(port.queue) < BUFFER_CAPACITY or total_link_load(link) == 0:
             with port.request(priority = generate_priority(ACCOUNTING_METHOD, pk)) as request:
                 yield request
                 transmission_start_time = env.now
@@ -160,17 +160,17 @@ temp_packet_generation_distribution = GUI.IntVar()
 temp_bandwidth_distribution = GUI.IntVar()
 
 DISTRIBUTION_TYPE = [
-    '0) uniform',
-    '1) triangular',
-    '2) betavariate',
-    '3) expovariate',
-    '4) gammavariate',
-    '5) gauss',
-    '6) lognormvariate',
-    '7) normalvariate',
-    '8) vonmisesvariate',
-    '9) paretovariate',
-    '10) weibullvariate',
+    '(0) Uniform',
+    '(1) Triangular',
+    '(2) Beta',
+    '(3) Exponential',
+    '(4) Gamma',
+    '(5) Gaussian',
+    '(6) Log-normal',
+    '(7) Normal',
+    '(8) von Mises',
+    '(9) Pareto',
+    '(10) Weibull',
 ]
 
 def p_check_distribution():
@@ -218,15 +218,15 @@ for i in range(len(DISTRIBUTION_TYPE)):
         command = b_check_distribution,
         ).grid(column = 0, sticky = GUI.W)
 
-GUI.Label(bandwidth_frame, text = 'Parameter 1 (Required)').grid(column = 0)
+GUI.Label(bandwidth_frame, text = 'Parameter 1').grid(column = 0)
 b_parameter_one_input = GUI.Entry(bandwidth_frame)
 b_parameter_one_input.insert(0, 0.0)
 b_parameter_one_input.grid(column = 0)
-GUI.Label(bandwidth_frame, text = 'Parameter 2 (Optional)').grid(column = 0)
+GUI.Label(bandwidth_frame, text = 'Parameter 2').grid(column = 0)
 b_parameter_two_input = GUI.Entry(bandwidth_frame)
 b_parameter_two_input.insert(0, 0.0)
 b_parameter_two_input.grid(column = 0)
-GUI.Label(bandwidth_frame, text = 'Parameter 3 (Optional)').grid(column = 0)
+GUI.Label(bandwidth_frame, text = 'Parameter 3').grid(column = 0)
 b_parameter_three_input = GUI.Entry(bandwidth_frame)
 b_parameter_three_input.insert(0, 0.0)
 b_parameter_three_input.grid(column = 0)
@@ -252,15 +252,15 @@ for i in range(len(DISTRIBUTION_TYPE)):
         command = p_check_distribution,
         ).grid(column = 1, sticky = GUI.W)
 
-GUI.Label(frequency_frame, text = 'Parameter 1 (Required)').grid(column = 1)
+GUI.Label(frequency_frame, text = 'Parameter 1').grid(column = 1)
 p_parameter_one_input = GUI.Entry(frequency_frame)
 p_parameter_one_input.insert(0, 0.0)
 p_parameter_one_input.grid(column = 1)
-GUI.Label(frequency_frame, text = 'Parameter 2 (Optional)').grid(column = 1)
+GUI.Label(frequency_frame, text = 'Parameter 2').grid(column = 1)
 p_parameter_two_input = GUI.Entry(frequency_frame)
 p_parameter_two_input.insert(0, 0.0)
 p_parameter_two_input.grid(column = 1)
-GUI.Label(frequency_frame, text = 'Parameter 3 (Optional)').grid(column = 1)
+GUI.Label(frequency_frame, text = 'Parameter 3').grid(column = 1)
 p_parameter_three_input = GUI.Entry(frequency_frame)
 p_parameter_three_input.insert(0, 0.0)
 p_parameter_three_input.grid(column = 1)
@@ -307,7 +307,7 @@ GUI.Label(
     padx = 20,
     ).grid(column = 0)
 
-accounting_methods = ['0) FIFO', '1) LIFO', '2) RO']
+accounting_methods = ['(0) FIFO', '(1) LIFO', '(2) RO']
 
 for i in range(len(accounting_methods)):
     GUI.Radiobutton(
@@ -334,7 +334,7 @@ GUI.Label(
     padx = 20,
     ).grid(column = 0)
 
-request_methods = ['0) Lowest Load', '1) Random', '2) Order', '3) Orderly loop']
+request_methods = ['(0) Lowest Load', '(1) Random', '(2) Order', '(3) Orderly loop']
 
 for i in range(len(request_methods)):
     GUI.Radiobutton(
@@ -526,9 +526,9 @@ def apply_changes():
     for key in global_variables:
         print(key, '->', global_variables[key])
 
-GUI.Button(button_frame, text = 'Apply Changes', command = apply_changes).grid(column = 0, row = 0)
-GUI.Button(button_frame, text = 'Start', command = start_simulation).grid(column = 1, row = 0)
-GUI.Button(button_frame, text = 'Pause (Not available)').grid(column = 2, row = 0)
+GUI.Button(button_frame, text = 'Apply', command = apply_changes).grid(column = 0, row = 0)
+GUI.Button(button_frame, text = 'Start', command = start_simulation).grid(column = 1, row = 0, padx = 15)
+#GUI.Button(button_frame, text = 'Pause (Not available)').grid(column = 2, row = 0)
 button_frame.grid(row = 4, columnspan = 2, pady = 10)
 
 ##
