@@ -218,8 +218,6 @@ for i in range(len(DISTRIBUTION_TYPE)):
         command = b_check_distribution,
         ).grid(column = 0, sticky = GUI.W)
 
-b_check_distribution()
-
 GUI.Label(bandwidth_frame, text = 'Parameter 1 (Required)').grid(column = 0)
 b_parameter_one_input = GUI.Entry(bandwidth_frame)
 b_parameter_one_input.insert(0, 0.0)
@@ -232,6 +230,8 @@ GUI.Label(bandwidth_frame, text = 'Parameter 3 (Optional)').grid(column = 0)
 b_parameter_three_input = GUI.Entry(bandwidth_frame)
 b_parameter_three_input.insert(0, 0.0)
 b_parameter_three_input.grid(column = 0)
+
+b_check_distribution()
 
 bandwidth_frame.grid(column = 0, row = 1, padx = 15, pady = 5)
 
@@ -252,8 +252,6 @@ for i in range(len(DISTRIBUTION_TYPE)):
         command = p_check_distribution,
         ).grid(column = 1, sticky = GUI.W)
 
-p_check_distribution()
-
 GUI.Label(frequency_frame, text = 'Parameter 1 (Required)').grid(column = 1)
 p_parameter_one_input = GUI.Entry(frequency_frame)
 p_parameter_one_input.insert(0, 0.0)
@@ -266,6 +264,8 @@ GUI.Label(frequency_frame, text = 'Parameter 3 (Optional)').grid(column = 1)
 p_parameter_three_input = GUI.Entry(frequency_frame)
 p_parameter_three_input.insert(0, 0.0)
 p_parameter_three_input.grid(column = 1)
+
+p_check_distribution()
 
 frequency_frame.grid(column = 1, row = 1, padx = 15, pady = 5)
 
