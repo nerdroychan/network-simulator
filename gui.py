@@ -86,7 +86,10 @@ def packet(env, pk, link):
     global total_queuing_delay
     global total_transmission_delay
 
-    size = 1 / generate_interval(BANDWIDTH_DISTRIBUTION, B_PARAMETER_ONE, B_PARAMETER_TWO, B_PARAMETER_THREE)
+    try:
+        size = 1 / generate_interval(BANDWIDTH_DISTRIBUTION, B_PARAMETER_ONE, B_PARAMETER_TWO, B_PARAMETER_THREE)
+    except ZeroDivisionError:
+        size = 2147483648
     print('Packet %d generated at %s, size = %s' % (pk, env.now, size))
     packet_generated += 1
     generation_time = float(env.now)
@@ -109,10 +112,12 @@ def packet(env, pk, link):
         print('Packet %d lost at %s' % (pk, env.now))
 
 def transmit(env, link):
+    global TOTAL_TIME
     global packet_generated
     global packet_lost
     global total_queuing_delay
     global total_transmission_delay
+    global graph_dict
 
     packet_generated = 0
     packet_lost = 0
@@ -141,6 +146,7 @@ button_frame    = GUI.Frame(main)
 message_frame   = GUI.Frame(main)
 accounting_method_frame = GUI.Frame(main)
 request_method_frame = GUI.Frame(main)
+total_time_frame = GUI.Frame(main)
 
 ##
 # Distributions
@@ -206,7 +212,7 @@ GUI.Label(
     text = 'Bandwidth:',
     justify = GUI.LEFT,
     padx = 20,
-    ).grid(column = 0)
+    ).grid()
 
 for i in range(len(DISTRIBUTION_TYPE)):
     GUI.Radiobutton(
@@ -216,31 +222,31 @@ for i in range(len(DISTRIBUTION_TYPE)):
         variable = temp_bandwidth_distribution, 
         value = i,
         command = b_check_distribution,
-        ).grid(column = 0, sticky = GUI.W)
+        ).grid(sticky = GUI.W)
 
-GUI.Label(bandwidth_frame, text = 'Parameter 1').grid(column = 0)
+GUI.Label(bandwidth_frame, text = 'Parameter 1').grid()
 b_parameter_one_input = GUI.Entry(bandwidth_frame)
 b_parameter_one_input.insert(0, 0.0)
-b_parameter_one_input.grid(column = 0)
-GUI.Label(bandwidth_frame, text = 'Parameter 2').grid(column = 0)
+b_parameter_one_input.grid()
+GUI.Label(bandwidth_frame, text = 'Parameter 2').grid()
 b_parameter_two_input = GUI.Entry(bandwidth_frame)
 b_parameter_two_input.insert(0, 0.0)
-b_parameter_two_input.grid(column = 0)
-GUI.Label(bandwidth_frame, text = 'Parameter 3').grid(column = 0)
+b_parameter_two_input.grid()
+GUI.Label(bandwidth_frame, text = 'Parameter 3').grid()
 b_parameter_three_input = GUI.Entry(bandwidth_frame)
 b_parameter_three_input.insert(0, 0.0)
-b_parameter_three_input.grid(column = 0)
+b_parameter_three_input.grid()
 
 b_check_distribution()
 
-bandwidth_frame.grid(column = 0, row = 1, padx = 15, pady = 5)
+bandwidth_frame.grid(column = 0, row = 0, padx = 15, pady = 5)
 
 GUI.Label(
     frequency_frame,
     text = 'Frequency:',
     justify = GUI.LEFT,
     padx = 20,
-    ).grid(column = 1)
+    ).grid()
 
 for i in range(len(DISTRIBUTION_TYPE)):
     GUI.Radiobutton(
@@ -250,24 +256,24 @@ for i in range(len(DISTRIBUTION_TYPE)):
         variable = temp_packet_generation_distribution, 
         value = i,
         command = p_check_distribution,
-        ).grid(column = 1, sticky = GUI.W)
+        ).grid(sticky = GUI.W)
 
-GUI.Label(frequency_frame, text = 'Parameter 1').grid(column = 1)
+GUI.Label(frequency_frame, text = 'Parameter 1').grid()
 p_parameter_one_input = GUI.Entry(frequency_frame)
 p_parameter_one_input.insert(0, 0.0)
-p_parameter_one_input.grid(column = 1)
-GUI.Label(frequency_frame, text = 'Parameter 2').grid(column = 1)
+p_parameter_one_input.grid()
+GUI.Label(frequency_frame, text = 'Parameter 2').grid()
 p_parameter_two_input = GUI.Entry(frequency_frame)
 p_parameter_two_input.insert(0, 0.0)
-p_parameter_two_input.grid(column = 1)
-GUI.Label(frequency_frame, text = 'Parameter 3').grid(column = 1)
+p_parameter_two_input.grid()
+GUI.Label(frequency_frame, text = 'Parameter 3').grid()
 p_parameter_three_input = GUI.Entry(frequency_frame)
 p_parameter_three_input.insert(0, 0.0)
-p_parameter_three_input.grid(column = 1)
+p_parameter_three_input.grid()
 
 p_check_distribution()
 
-frequency_frame.grid(column = 1, row = 1, padx = 15, pady = 5)
+frequency_frame.grid(column = 1, row = 0, padx = 15, pady = 5)
 
 ##
 # Other Parameters
@@ -291,7 +297,7 @@ resource_pool_capacity_input = GUI.Entry(parameter_frame)
 resource_pool_capacity_input.insert(0, 0)
 resource_pool_capacity_input.grid(column = 1, row = 1, padx = 20, sticky = GUI.W)
 
-parameter_frame.grid(row = 2, columnspan = 2, pady = 5)
+parameter_frame.grid(row = 1, columnspan = 2, pady = 5)
 
 ##
 # Accounting Method
@@ -305,7 +311,7 @@ GUI.Label(
     text = 'Accounting Method',
     justify = GUI.LEFT,
     padx = 20,
-    ).grid(column = 0)
+    ).grid()
 
 accounting_methods = ['(0) FIFO', '(1) LIFO', '(2) RO']
 
@@ -316,9 +322,9 @@ for i in range(len(accounting_methods)):
         padx = 20, 
         variable = temp_accounting_method,
         value = i,
-        ).grid(column = 0, sticky = GUI.W)
+        ).grid(row = i + 1, sticky = GUI.W)
 
-accounting_method_frame.grid(column = 0, row = 3)
+accounting_method_frame.grid(column = 0, row = 2)
 
 ##
 # Request Method
@@ -332,7 +338,7 @@ GUI.Label(
     text = 'Request Method',
     justify = GUI.LEFT,
     padx = 20,
-    ).grid(column = 0)
+    ).grid()
 
 request_methods = ['(0) Lowest Load', '(1) Random', '(2) Order', '(3) Orderly loop']
 
@@ -343,9 +349,26 @@ for i in range(len(request_methods)):
         padx = 20,
         variable = temp_request_method,
         value = i,
-        ).grid(column = 0, sticky = GUI.W)
+        ).grid(row = i + 1, sticky = GUI.W)
 
-request_method_frame.grid(column = 1, row = 3)
+request_method_frame.grid(column = 1, row = 2)
+
+##
+# Total Time
+##
+
+TOTAL_TIME = 10000
+GUI.Label(
+    total_time_frame,
+    text = 'Simulation Time',
+    justify = GUI.LEFT,
+    padx = 20,
+    ).grid()
+
+total_time_input = GUI.Entry(total_time_frame)
+total_time_input.insert(0, 0)
+total_time_input.grid(padx = 20, sticky = GUI.W)
+total_time_frame.grid(column = 0, row = 3, pady = 15)
 
 ##
 # Matplotlib
@@ -358,9 +381,9 @@ graph_dict = {
     'throughput': []
 }
 
-for i in range(10000):
+'''for i in range(TOTAL_TIME):
     for key in graph_dict:
-        graph_dict[key].append(0)
+        graph_dict[key].append(0)'''
 
 figure = plt.Figure(figsize = (8,6), dpi = 100)
 
@@ -369,20 +392,30 @@ atd = figure.add_subplot(2, 2, 2)
 plr = figure.add_subplot(2, 2, 3)
 tp = figure.add_subplot(2, 2, 4)
 
+aqd.set_ylabel('Average Queuing Delay')
+aqd.set_xlabel('Time')
+atd.set_ylabel('Average Transmission Delay')
+atd.set_xlabel('Time')
+plr.set_ylabel('Packet Lost Rate')
+plr.set_xlabel('Time')
+tp.set_ylabel('Throughput')
+tp.set_xlabel('Time')
+
 canvas = mpl.backends.backend_tkagg.FigureCanvasTkAgg(figure, master= main)
 canvas.show()
-canvas.get_tk_widget().grid(row = 1, column = 2, rowspan = 4, padx = 20, pady = 20)
+canvas.get_tk_widget().grid(row = 0, column = 2, rowspan = 4, padx = 20, pady = 20)
 
 ##
 # Control
 ##
 
 def graph(env, graph_dict):
+    global TOTAL_TIME
     global packet_generated
     global packet_lost
     global total_queuing_delay
     global total_transmission_delay
-    for i in range(10000):
+    for i in range(TOTAL_TIME):
         try:
             graph_dict['average_queuing_delay'][i] = (total_queuing_delay / (packet_generated - packet_lost))
         except ZeroDivisionError:
@@ -425,9 +458,10 @@ def clear_graph():
     tp.set_xlabel('Time')
     
     canvas.show()
-    canvas.get_tk_widget().grid(row = 1, column = 2, rowspan = 4, padx = 20, pady = 20)
+    canvas.get_tk_widget().grid(row = 0, column = 2, rowspan = 4, padx = 20, pady = 20)
 
 def start_simulation():
+    global TOTAL_TIME
     global graph_dict
     global figure
     global aqd
@@ -435,41 +469,48 @@ def start_simulation():
     global plr
     global tp
     global canvas
+
+    graph_dict = {
+        'average_queuing_delay': [],
+        'average_transmission_delay': [],
+        'packet_lost_rate': [],
+        'throughput': []
+    }
+    for i in range(TOTAL_TIME):
+        for key in graph_dict:
+            graph_dict[key].append(0)
+
     env = simpy.Environment()
     link = []
     for i in range(RESOURCE_POOL_CAPACITY):
         link.append(simpy.PriorityResource(env, capacity = 1))
     env.process(transmit(env, link))
     env.process(graph(env, graph_dict))
-    env.run(until = 10000)
 
-    aqd.plot(range(10000), graph_dict['average_queuing_delay'])
-    aqd.set_ylabel('Average Queuing Delay')
-    aqd.set_xlabel('Time')
+    env.run(until = TOTAL_TIME)
 
-    atd.plot(range(10000), graph_dict['average_transmission_delay'])
-    atd.set_ylabel('Average Transmission Delay')
-    atd.set_xlabel('Time')
-
-    plr.plot(range(10000), graph_dict['packet_lost_rate'])
-    plr.set_ylabel('Packet Lost Rate')
-    plr.set_xlabel('Time')
-
-    tp.plot(range(10000), graph_dict['throughput'])
-    tp.set_ylabel('Throughput')
-    tp.set_xlabel('Time')
+    aqd.plot(range(TOTAL_TIME), graph_dict['average_queuing_delay'])
+    atd.plot(range(TOTAL_TIME), graph_dict['average_transmission_delay'])
+    plr.plot(range(TOTAL_TIME), graph_dict['packet_lost_rate'])
+    tp.plot(range(TOTAL_TIME), graph_dict['throughput'])
 
     canvas.show()
-    canvas.get_tk_widget().grid(row = 1, column = 2, rowspan = 4, padx = 20, pady = 20)
+    canvas.get_tk_widget().grid(row = 0, column = 2, rowspan = 4, padx = 20, pady = 20)
 
-    print('Total packet generated', packet_generated)
-    print('Total packet lost', packet_lost)
-    print('Total Queuing Delay', total_queuing_delay)
-    print('Total Transmission Delay', total_transmission_delay)
-    print('Average Queuing Dealy', str(total_queuing_delay / (packet_generated - packet_lost)))
-    print('Average Transmission Dealy', str(total_transmission_delay / (packet_generated - packet_lost)))
+    print('Total packet generated:', packet_generated)
+    print('Total packet lost:', packet_lost)
+    print('Total Queuing Delay:', total_queuing_delay)
+    print('Total Transmission Delay:', total_transmission_delay)
+    try:
+        print('Average Queuing Dealy:', str(total_queuing_delay / (packet_generated - packet_lost)))
+    except ZeroDivisionError:
+        print('Average Queuing Dealy', 'NULL')
+    try:
+        print('Average Transmission Dealy:', str(total_transmission_delay / (packet_generated - packet_lost)))
+    except ZeroDivisionError:
+        print('Average Transmission Dealy:', 'NULL')
     print('Packet lost rate', str(packet_lost / packet_generated * 100), '%')
-    print('Average Throughput', str((packet_generated - packet_lost) / 10000))
+    print('Average Throughput', str((packet_generated - packet_lost) / TOTAL_TIME))
 
 def apply_changes():
     global temp_packet_generation_distribution
@@ -489,6 +530,7 @@ def apply_changes():
     global ACCOUNTING_METHOD
     global REQUEST_METHOD
     global RESOURCE_POOL_CAPACITY
+    global TOTAL_TIME
     global buffer_capacity_input
     global resource_pool_capacity_input
     global p_parameter_one_input
@@ -512,22 +554,30 @@ def apply_changes():
         except:
             return False
 
-    integer_input = [buffer_capacity_input, resource_pool_capacity_input]
+    integer_input = [buffer_capacity_input, resource_pool_capacity_input, total_time_input]
 
     for i in range(len(integer_input)):
         if not is_integer(integer_input[i].get()):
-            print('Something wrong, please check your input. 1')
-            return
+            print('Buffer capacity, resource pool capacity and total time must be an integet.')
+            return False
+
+    if int(total_time_input.get()) <= 99:
+        print('Simulation time too short, must bigger than 100.')
+        return False
 
     float_input = [
         p_parameter_one_input, p_parameter_two_input, p_parameter_three_input,
         b_parameter_one_input, b_parameter_two_input, b_parameter_three_input,
     ]
 
+    if float(p_parameter_one_input.get()) == 0.0:
+        print('The parameter one of the packet generation frequency must not be 0.')
+        return False
+
     for i in range(len(float_input)):
         if not is_float(float_input[i].get()):
-            print('Something wrong, please check your input. 2')
-            return
+            print('The six parameters must be a number.')
+            return False
 
     temp = [temp_packet_generation_distribution, temp_bandwidth_distribution, temp_accounting_method, temp_request_method]
 
@@ -545,6 +595,7 @@ def apply_changes():
 
     BUFFER_CAPACITY = int(integer_input[0].get())
     RESOURCE_POOL_CAPACITY = int(integer_input[1].get())
+    TOTAL_TIME = int(integer_input[2].get())
 
     global_variables = {
         'PACKET_GENERATION_DISTRIBUTION': PACKET_GENERATION_DISTRIBUTION,
@@ -564,10 +615,22 @@ def apply_changes():
     for key in global_variables:
         print(key, '->', global_variables[key])
 
-GUI.Button(button_frame, text = 'Apply', command = apply_changes).grid(column = 0, row = 0)
-GUI.Button(button_frame, text = 'Start', command = start_simulation).grid(column = 1, row = 0, padx = 15)
-GUI.Button(button_frame, text = 'Clear', command = clear_graph).grid(column = 2, row = 0)
-button_frame.grid(row = 4, columnspan = 2, pady = 10)
+def start():
+    if apply_changes() == False:
+        print('Aborted')
+        return
+    start_simulation()
+
+GUI.Label(
+    button_frame,
+    text = 'Controls',
+    justify = GUI.LEFT,
+    padx = 20,
+    ).grid(row = 0, columnspan = 2)
+
+GUI.Button(button_frame, text = 'Start', command = start).grid(column = 0, row = 1)
+GUI.Button(button_frame, text = 'Clear', command = clear_graph).grid(column = 1, row = 1, padx = 15)
+button_frame.grid(row = 3, column = 1, pady = 15)
 
 ##
 # Start Main loop
