@@ -629,7 +629,7 @@ GUI.Label(
     ).grid(row = 0, columnspan = 2)
 
 GUI.Button(button_frame, text = 'Start', command = start).grid(column = 0, row = 1)
-GUI.Button(button_frame, text = 'Clear', command = clear_graph).grid(column = 1, row = 1, padx = 15)
+GUI.Button(button_frame, text = 'Clear', command = clear_graph).grid(column = 1, row = 1)
 button_frame.grid(row = 3, column = 1, pady = 15)
 
 ##
