@@ -558,7 +558,7 @@ def apply_changes():
 
     for i in range(len(integer_input)):
         if not is_integer(integer_input[i].get()):
-            print('Buffer capacity, resource pool capacity and total time must be an integet.')
+            print('Buffer capacity, resource pool capacity and total time must be an integer.')
             return False
 
     if int(total_time_input.get()) <= 99:
@@ -570,14 +570,14 @@ def apply_changes():
         b_parameter_one_input, b_parameter_two_input, b_parameter_three_input,
     ]
 
-    if float(p_parameter_one_input.get()) == 0.0:
-        print('The parameter one of the packet generation frequency must not be 0.')
-        return False
-
     for i in range(len(float_input)):
         if not is_float(float_input[i].get()):
             print('The six parameters must be a number.')
             return False
+
+    if float(p_parameter_one_input.get()) == 0.0:
+        print('The parameter one of the packet generation frequency must not be 0.')
+        return False
 
     temp = [temp_packet_generation_distribution, temp_bandwidth_distribution, temp_accounting_method, temp_request_method]
 
